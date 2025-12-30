@@ -1,5 +1,5 @@
-import { createClient } from 'redis';
-import dotenv from 'dotenv';
+import { createClient } from "redis";
+import dotenv from "dotenv";
 dotenv.config();
 
 let redisClient: ReturnType<typeof createClient> | null = null;
@@ -13,23 +13,17 @@ export const initializeRedis = async () => {
 
   const client = createClient({
     url: redisUrl,
-    // TLS settings for cloud Redis
-    tls: {
-      rejectUnauthorized: false
-    }
+    socket: redisUrl.startsWith("rediss://")
+      ? { tls: true }  // secure hosted Redis (Redis Cloud)
+      : undefined      // local redis://localhost:6379
   });
 
   client.on("connect", () => console.log("Redis connected"));
   client.on("error", (err) => console.error("Redis error:", err));
 
-  try {
-    await client.connect();
-    redisClient = client;
-    return client;
-  } catch (error) {
-    console.error("Redis connection failed:", error);
-    return null;
-  }
+  await client.connect();
+  redisClient = client;
+  return client;
 };
 
 export const getRedisClient = () => redisClient;
