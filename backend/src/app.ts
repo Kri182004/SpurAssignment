@@ -11,7 +11,12 @@ const app = express();
 // Initialize Redis connection
 initializeRedis();
 
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"]
+}));
+
 app.use(express.json());
 app.use('/chat', chatRouter);
 
